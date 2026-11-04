@@ -8,13 +8,16 @@ import Question from './Question.jsx'
 import NextQuestion from './NextQuestion.jsx'
 import Progress from './Progress.jsx'
 import FinishScreen from './FinishScreen.jsx'
+import Footer from './Footer.jsx'
+import Timer from './Timer.jsx'
 const initialState = {
   questions: [],
   status: "loading",
   index: 0,
   answer: null,
   points: 0,
-  highScore: 0
+  highScore: 0,
+  secondsRemaining: null
 }
 const reducer = (state, action) => {
   switch(action.type) {
@@ -32,7 +35,8 @@ const reducer = (state, action) => {
       case "start":
       return {
         ...state,
-        status: "active"
+        status: "active",
+        secondsRemaining: state.questions.length * 30
       }
       case "newAnswer":
         const question = state.questions.at(state.index);
@@ -59,13 +63,19 @@ const reducer = (state, action) => {
               questions: state.questions,
               status: "ready" 
             }
+            case "tick":
+              return {
+                ...state,
+                secondsRemaining: state.secondsRemaining - 1,
+                status: state.secondsRemaining === 0 ? "finished" : state.status
+              }
     default:
       throw new Error("Unknown action type")
   }
 
 }
 function App() {
-  const [{questions, status, index, answer, points, highScore}, dispatch] = useReducer(reducer, initialState);
+  const [{questions, status, index, answer, points, highScore, secondsRemaining}, dispatch] = useReducer(reducer, initialState);
   const numQuestions = questions.length;
   const maxPossiblePoints = questions.reduce((prev, cur) => prev + cur.points, 0);
   useEffect(() => {
@@ -80,11 +90,16 @@ function App() {
       <Dashboard >
         {status === "loading" && <Loader />}
         {status === "ready" && <StartScreen numQuestions={numQuestions} dispatch={dispatch} />}
-        {status === "active" && <>
-        <Progress index={index} numQuestions = {numQuestions} points = {points} maxPossiblePoints = {maxPossiblePoints} answer={answer}/>
-        <Question question={questions[index]} dispatch={dispatch} answer={answer}/>
-        <NextQuestion dispatch={dispatch} answer={answer} index={index} numQuestions={numQuestions}/>
-</>}
+        {status === "active" &&
+          <>
+          <Progress index={index} numQuestions = {numQuestions} points = {points} maxPossiblePoints = {maxPossiblePoints} answer={answer}/>
+          <Question question={questions[index]} dispatch={dispatch} answer={answer}/>
+          <Footer >
+            <Timer secondsRemaining={secondsRemaining} dispatch={dispatch}/>
+            <NextQuestion dispatch={dispatch} answer={answer} index={index} numQuestions={numQuestions}/>
+          </Footer>
+          </>
+        } 
         {status === "finished" && <FinishScreen points={points} maxPossiblePoints={maxPossiblePoints} highScore={highScore} dispatch={dispatch}/>}
         {status === "error" && <Error />}
         
