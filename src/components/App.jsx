@@ -13,7 +13,8 @@ const initialState = {
   status: "loading",
   index: 0,
   answer: null,
-  points: 0
+  points: 0,
+  highScore: 0
 }
 const reducer = (state, action) => {
   switch(action.type) {
@@ -44,12 +45,19 @@ const reducer = (state, action) => {
           return {
             ...state,
             index: state.index + 1,
-            answer: null
+            answer: null,
+            highScore: state.points > state.highScore ? state.points: state.highScore
           }
           case "finish":
             return {
               ...state,
               status: "finished"
+            }
+          case "restart":
+            return {
+              ...initialState,
+              questions: state.questions,
+              status: "ready" 
             }
     default:
       throw new Error("Unknown action type")
@@ -57,7 +65,7 @@ const reducer = (state, action) => {
 
 }
 function App() {
-  const [{questions, status, index, answer, points}, dispatch] = useReducer(reducer, initialState);
+  const [{questions, status, index, answer, points, highScore}, dispatch] = useReducer(reducer, initialState);
   const numQuestions = questions.length;
   const maxPossiblePoints = questions.reduce((prev, cur) => prev + cur.points, 0);
   useEffect(() => {
@@ -77,7 +85,7 @@ function App() {
         <Question question={questions[index]} dispatch={dispatch} answer={answer}/>
         <NextQuestion dispatch={dispatch} answer={answer} index={index} numQuestions={numQuestions}/>
 </>}
-        {status === "finished" && <FinishScreen points={points} maxPossiblePoints={maxPossiblePoints} dispatch={dispatch}/>}
+        {status === "finished" && <FinishScreen points={points} maxPossiblePoints={maxPossiblePoints} highScore={highScore} dispatch={dispatch}/>}
         {status === "error" && <Error />}
         
       </Dashboard>
