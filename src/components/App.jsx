@@ -3,9 +3,14 @@ import Dashboard from './Dashboard.jsx'
 import Header from './Header.jsx'
 import Loader from './Loader.jsx'
 import Error from './Error.jsx'
+import StartScreen from './StartScreen.jsx'
+import Question from './Question.jsx'
 const initialState = {
   questions: [],
   status: "loading",
+  index: 0,
+  answer: null,
+  points: 0
 }
 const reducer = (state, action) => {
   switch(action.type) {
@@ -20,13 +25,26 @@ const reducer = (state, action) => {
         ...state,
         status: "error"
       }
+      case "start":
+      return {
+        ...state,
+        status: "active"
+      }
+      case "newAnswer":
+        const question = state.questions.at(state.index);
+        return {
+          ...state,
+          answer: action.payload,
+          points: action.payload === question.correctOption ? state.points + question.points : state.points
+        }
     default:
       throw new Error("Unknown action type")
   }
 
 }
 function App() {
-  const [{questions, status}, dispatch] = useReducer(reducer, initialState);
+  const [{questions, status, index, answer, points}, dispatch] = useReducer(reducer, initialState);
+  const numQuestions = questions.length;
   useEffect(() => {
     fetch('http://localhost:8000/questions')
     .then((res) => res.json())
@@ -38,7 +56,10 @@ function App() {
       <Header />
       <Dashboard >
         {status === "loading" && <Loader />}
+        {status === "ready" && <StartScreen numQuestions={numQuestions} dispatch={dispatch} />}
+        {status === "active" && <Question question={questions[index]} dispatch={dispatch} answer={answer}/>}
         {status === "error" && <Error />}
+        
       </Dashboard>
     </div>
   )
