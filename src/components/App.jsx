@@ -79,7 +79,7 @@ function App() {
   const numQuestions = questions.length;
   const maxPossiblePoints = questions.reduce((prev, cur) => prev + cur.points, 0);
   useEffect(() => {
-    fetch('http://localhost:8000/questions')
+    fetch('https://react-quiz-api-9uvm.onrender.com/questions')
     .then((res) => res.json())
     .then((data) => dispatch({type: "dataReceived", payload: data}))
     .catch(error => dispatch({type: "dataFailed"}))
