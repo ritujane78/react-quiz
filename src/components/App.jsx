@@ -5,6 +5,7 @@ import Loader from './Loader.jsx'
 import Error from './Error.jsx'
 import StartScreen from './StartScreen.jsx'
 import Question from './Question.jsx'
+import NextQuestion from './NextQuestion.jsx'
 const initialState = {
   questions: [],
   status: "loading",
@@ -37,6 +38,12 @@ const reducer = (state, action) => {
           answer: action.payload,
           points: action.payload === question.correctOption ? state.points + question.points : state.points
         }
+        case "nextQuestion":
+          return {
+            ...state,
+            index: state.index + 1,
+            answer: null
+          }
     default:
       throw new Error("Unknown action type")
   }
@@ -57,7 +64,8 @@ function App() {
       <Dashboard >
         {status === "loading" && <Loader />}
         {status === "ready" && <StartScreen numQuestions={numQuestions} dispatch={dispatch} />}
-        {status === "active" && <Question question={questions[index]} dispatch={dispatch} answer={answer}/>}
+        {status === "active" && <><Question question={questions[index]} dispatch={dispatch} answer={answer}/>
+        <NextQuestion dispatch={dispatch} answer={answer}/></>}
         {status === "error" && <Error />}
         
       </Dashboard>
