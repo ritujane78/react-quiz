@@ -7,6 +7,7 @@ import StartScreen from './StartScreen.jsx'
 import Question from './Question.jsx'
 import NextQuestion from './NextQuestion.jsx'
 import Progress from './Progress.jsx'
+import FinishScreen from './FinishScreen.jsx'
 const initialState = {
   questions: [],
   status: "loading",
@@ -45,6 +46,11 @@ const reducer = (state, action) => {
             index: state.index + 1,
             answer: null
           }
+          case "finish":
+            return {
+              ...state,
+              status: "finished"
+            }
     default:
       throw new Error("Unknown action type")
   }
@@ -69,7 +75,9 @@ function App() {
         {status === "active" && <>
         <Progress index={index} numQuestions = {numQuestions} points = {points} maxPossiblePoints = {maxPossiblePoints} answer={answer}/>
         <Question question={questions[index]} dispatch={dispatch} answer={answer}/>
-        <NextQuestion dispatch={dispatch} answer={answer}/></>}
+        <NextQuestion dispatch={dispatch} answer={answer} index={index} numQuestions={numQuestions}/>
+</>}
+        {status === "finished" && <FinishScreen points={points} maxPossiblePoints={maxPossiblePoints} dispatch={dispatch}/>}
         {status === "error" && <Error />}
         
       </Dashboard>
